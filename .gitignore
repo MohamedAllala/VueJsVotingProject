@@ -1,0 +1,15 @@
+.idea
+Vue/.DS_Store
+Vue/node_modules/
+Vue/dist/
+Vue/npm-debug.log
+Vue/yarn-error.log
+
+QueriesGenerator/node_modules
+QueriesGenerator/.idea
+# Editor directories and files
+Vue/.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln

@@ -1,0 +1,23 @@
+{
+  "accounts": [
+    {
+      "username": "arbi",
+      "password": "azeaze",
+      "api_key": "azeaze",
+      "_id": "5ab984759a611a298c0f1234"
+    }
+  ],
+  "params": [
+    "arbi",
+    "grine"
+  ],
+  "formats": [
+    "aze",
+    "aze"
+  ],
+  "_id": "5ab98477bb0d2fad6165d19f",
+  "name": null,
+  "trust_ratio": 60,
+  "method": "get",
+  "api_url": "http://azeaze.com"
+}

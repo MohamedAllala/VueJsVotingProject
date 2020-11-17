@@ -1,0 +1,238 @@
+var express = require('express');
+var router = express.Router();
+
+var Web3 = require('web3'); 
+const web3 = new Web3(new Web3.providers.HttpProvider("http://127.0.0.1:8545"));
+
+const fs = require('fs');
+const solc = require('solc');
+
+
+var voteIndex = new Number();
+var ABI ; 
+var VotingContract ; 
+var sampleContractInstance ;
+var gasEstimate ; 
+
+
+/*var ABI = [
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "name",
+		"outputs": [
+			{
+				"name": "",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "auctionEnd",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "uint256"
+			}
+		],
+		"name": "candidates",
+		"outputs": [
+			{
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"name": "voteCount",
+				"type": "uint8"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "voteIndex",
+				"type": "uint8"
+			}
+		],
+		"name": "totalVotesFor",
+		"outputs": [
+			{
+				"name": "",
+				"type": "uint8"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [],
+		"name": "owner",
+		"outputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"name": "",
+				"type": "address"
+			}
+		],
+		"name": "voters",
+		"outputs": [
+			{
+				"name": "voted",
+				"type": "bool"
+			},
+			{
+				"name": "voteIndex",
+				"type": "uint8"
+			},
+			{
+				"name": "weight",
+				"type": "uint256"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [
+			{
+				"name": "voteIndex",
+				"type": "uint8"
+			}
+		],
+		"name": "vote",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"constant": false,
+		"inputs": [],
+		"name": "end",
+		"outputs": [],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+			{
+				"name": "_name",
+				"type": "string"
+			},
+			{
+				"name": "durationMinutes",
+				"type": "uint256"
+			},
+			{
+				"name": "candidate1",
+				"type": "string"
+			},
+			{
+				"name": "candidate2",
+				"type": "string"
+			}
+		],
+		"payable": false,
+		"stateMutability": "nonpayable",
+		"type": "constructor"
+	},
+	{
+		"anonymous": false,
+		"inputs": [
+			{
+				"indexed": false,
+				"name": "name",
+				"type": "string"
+			},
+			{
+				"indexed": false,
+				"name": "voteCount",
+				"type": "uint8"
+			}
+		],
+		"name": "electionResult",
+		"type": "event"
+	}
+]
+
+var VotingContract = web3.eth.contract(ABI);
+
+var sampleContractInstance = VotingContract.at("0x50faa27d9179ca9b7d501a7d065aa5a4d78af395");*/
+
+//var params = { gas: 40000,from: "0xca35b7d915458ef540ade6068dfe2f44e8fa733c"} ; 
+  
+    
+router.get('/',function(req,res){
+   const code = fs.readFileSync('./public/contract/election.sol').toString();
+   //Compilation 
+  const compiledContract = solc.compile(code);
+  //recuperation ABI
+  for (let contractName in compiledContract.contracts) {
+    var bytecode = compiledContract.contracts[contractName].bytecode;
+	 this.ABI= JSON.parse(compiledContract.contracts[contractName].interface);
+	  this.gasEstimate = web3.eth.estimateGas({
+    data: '0x' + bytecode
+  });
+  }
+	console.log(web3.eth.contract(this.ABI)); 
+	//affecter addrese
+	this.VotingContract = web3.eth.contract(this.ABI);
+   //Creation Instance
+    this.sampleContractInstance = this.VotingContract.new("election",10,"cand1","cand2",{from : web3.eth.accounts[0] , data: '0x' + bytecode,
+    gas: this.gasEstimate + 50000 });
+    res.send({message : "Deployed"}); 
+	
+
+})
+
+
+
+router.post('/',function(req,res){
+   
+	this.sampleContractInstance.vote(req.body.voteIndex,{from : web3.eth.accounts[0]}) ; 
+	
+	res.json(this.sampleContractInstance.totalVotesFor(req.body.voteIndex)) ;
+    
+	
+    
+})
+
+
+module.exports=router ; 
